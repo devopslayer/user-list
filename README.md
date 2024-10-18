@@ -1,4 +1,8 @@
-# React + TypeScript + Vite
+# About - Assignment
+
+- This project is a User List Page built with React and TypeScript that retrieves user details from a mock API. The application displays user information in a clean and responsive layout, allowing users to add, edit, and delete user records.
+
+## React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
