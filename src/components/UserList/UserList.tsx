@@ -1,0 +1,244 @@
+import "./UserList.css";
+import React, { useEffect, useState } from "react";
+
+interface User {
+  first_name: string;
+  last_name: string;
+  username: string;
+  age: number;
+  marital_status: string;
+  is_employed: boolean;
+  is_founder: boolean;
+}
+
+function UserList() {
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [newUser, setNewUser] = useState<User>({
+    first_name: "",
+    last_name: "",
+    username: "",
+    age: 1,
+    marital_status: "",
+    is_employed: false,
+    is_founder: false,
+  });
+
+  const [editIndex, setEditIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch(
+          "https://mocki.io/v1/a6a0fb6b-a84a-4934-b3f2-5c92cc77c44e"
+        );
+        if (!response.ok) throw new Error("Network response was not ok");
+        const data = await response.json();
+        setUsers(data);
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, []);
+
+  const handleAddOrUpdateUser = () => {
+    if (editIndex !== null) {
+      const updatedUsers = [...users];
+      updatedUsers[editIndex] = newUser;
+      setUsers(updatedUsers);
+      setEditIndex(null);
+    } else {
+      setUsers([...users, { ...newUser }]);
+    }
+
+    setNewUser({
+      first_name: "",
+      last_name: "",
+      username: "",
+      age: 1,
+      marital_status: "",
+      is_employed: false,
+      is_founder: false,
+    });
+  };
+
+  const handleEditUser = (index: number) => {
+    setEditIndex(index);
+    setNewUser(users[index]);
+  };
+
+  const handleDeleteUser = (index: number) => {
+    setUsers(users.filter((_, i) => i !== index));
+  };
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error}</p>;
+
+  return (
+    <div className="container mt-0">
+      <header className="d-flex overflow-hidden">
+        <h1>User</h1>
+        <h4>
+          <sub>List</sub>
+        </h4>
+      </header>
+
+      <div className="content">
+        <div className="mt-4">
+          <div className="card" style={{ width: "16rem" }}>
+            <div className="card-header">
+              <h4>{editIndex !== null ? "Edit User" : "Create a New User"}</h4>
+            </div>
+            <div className="card-body">
+              <input
+                type="text"
+                className="form-control"
+                placeholder="First Name"
+                value={newUser.first_name}
+                onChange={(e) =>
+                  setNewUser({ ...newUser, first_name: e.target.value })
+                }
+              />
+              <input
+                type="text"
+                className="form-control mt-2"
+                placeholder="Last Name"
+                value={newUser.last_name}
+                onChange={(e) =>
+                  setNewUser({ ...newUser, last_name: e.target.value })
+                }
+              />
+              <input
+                type="text"
+                className="form-control mt-2"
+                placeholder="Username"
+                value={newUser.username}
+                onChange={(e) =>
+                  setNewUser({ ...newUser, username: e.target.value })
+                }
+              />
+              <input
+                type="text"
+                className="form-control mt-2"
+                placeholder="Age"
+                value={newUser.age.toString()}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (
+                    value === "" ||
+                    (parseInt(value) > 0 &&
+                      parseInt(value) <= 120 &&
+                      !value.includes("e") &&
+                      /^[0-9]+$/.test(value))
+                  ) {
+                    setNewUser({ ...newUser, age: value ? +value : 1 });
+                  }
+                }}
+              />
+              <input
+                type="text"
+                className="form-control mt-2"
+                placeholder="Marital Status"
+                value={newUser.marital_status}
+                onChange={(e) =>
+                  setNewUser({ ...newUser, marital_status: e.target.value })
+                }
+              />
+              <div className="d-flex justify-content-start align-self-start">
+                <div className="form-check mt-2">
+                  <input
+                    className="form-check-input"
+                    type="checkbox"
+                    checked={newUser.is_employed}
+                    onChange={(e) =>
+                      setNewUser({ ...newUser, is_employed: e.target.checked })
+                    }
+                  />
+                  <label className="form-check-label">Employed</label>
+                </div>
+                <div className="form-check mt-2 mx-4">
+                  <input
+                    className="form-check-input"
+                    type="checkbox"
+                    checked={newUser.is_founder}
+                    onChange={(e) =>
+                      setNewUser({ ...newUser, is_founder: e.target.checked })
+                    }
+                  />
+                  <label className="form-check-label">Founder</label>
+                </div>
+              </div>
+              <button
+                className="btn btn-primary mt-2"
+                onClick={handleAddOrUpdateUser}
+              >
+                {editIndex !== null ? "Update User" : "Add User"}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <div
+            className="card list-card overflow-hidden"
+            style={{ height: "24.5rem" }}
+          >
+            <div className="card-header">
+              <h4>Members Overview</h4>
+            </div>
+            <div className="card-body scroll overflow-auto">
+              <table className="table table-striped">
+                <thead>
+                  <tr>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Username</th>
+                    <th>Age</th>
+                    <th>Marital Status</th>
+                    <th>Employed</th>
+                    <th>Founder</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.map((user, index) => (
+                    <tr key={index}>
+                      <td>{user.first_name}</td>
+                      <td>{user.last_name}</td>
+                      <td>{user.username}</td>
+                      <td>{user.age}</td>
+                      <td>{user.marital_status}</td>
+                      <td>{user.is_employed ? "Yes" : "No"}</td>
+                      <td>{user.is_founder ? "Yes" : "No"}</td>
+                      <td>
+                        <button
+                          className="btn btn-warning"
+                          onClick={() => handleEditUser(index)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="btn btn-danger ml-2"
+                          onClick={() => handleDeleteUser(index)}
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default UserList;
