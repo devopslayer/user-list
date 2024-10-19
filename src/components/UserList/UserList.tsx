@@ -1,10 +1,10 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
 import "./UserList.css";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Loading from "../Loading/Loading";
 
-interface User {
+export interface User {
   first_name: string;
   last_name: string;
   username: string;
@@ -41,8 +41,12 @@ function UserList() {
         if (!response.ok) throw new Error("Network response was not ok");
         const data = await response.json();
         setUsers(data);
-      } catch (error) {
-        setError(error.message);
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          setError(error.message);
+        } else {
+          setError("An unexpected error occurred");
+        }
       } finally {
         setLoading(false);
       }
@@ -81,7 +85,7 @@ function UserList() {
 
   const handleDeleteUser = (index: number) => {
     const confirmDelete = window.confirm(
-      "Deleting the user. This action cannot be undone."
+      "Deleting this user and cannot be undone."
     );
     if (confirmDelete) {
       setUsers(users.filter((_, i) => i !== index));
@@ -278,7 +282,9 @@ function UserList() {
           </div>
         </div>
       </div>
-      <footer className="footer">Copyright &copy; {date}. All right reserved.</footer>
+      <footer className="footer">
+        Copyright &copy; {date}. All right reserved.
+      </footer>
     </>
   );
 }
