@@ -1,3 +1,5 @@
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
 import "./UserList.css";
 import React, { useEffect, useState } from "react";
 
@@ -19,7 +21,7 @@ function UserList() {
     first_name: "",
     last_name: "",
     username: "",
-    age: 1,
+    age: 0,
     marital_status: "",
     is_employed: false,
     is_founder: false,
@@ -52,15 +54,17 @@ function UserList() {
       updatedUsers[editIndex] = newUser;
       setUsers(updatedUsers);
       setEditIndex(null);
+      alert("Updated user data");
     } else {
       setUsers([...users, { ...newUser }]);
+      alert("Added user data");
     }
 
     setNewUser({
       first_name: "",
       last_name: "",
       username: "",
-      age: 1,
+      age: 0,
       marital_status: "",
       is_employed: false,
       is_founder: false,
@@ -73,8 +77,20 @@ function UserList() {
   };
 
   const handleDeleteUser = (index: number) => {
-    setUsers(users.filter((_, i) => i !== index));
+    const confirmDelete = window.confirm(
+      "Deleting the user. This action cannot be undone."
+    );
+    if (confirmDelete) {
+      setUsers(users.filter((_, i) => i !== index));
+    }
   };
+
+  const isButtonDisabled =
+    !newUser.first_name ||
+    !newUser.last_name ||
+    !newUser.username ||
+    !newUser.marital_status ||
+    newUser.age <= 0;
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
@@ -94,92 +110,105 @@ function UserList() {
             <div className="card-header">
               <h4>{editIndex !== null ? "Edit User" : "Create a New User"}</h4>
             </div>
-            <div className="card-body">
-              <input
-                type="text"
-                className="form-control"
-                placeholder="First Name"
-                value={newUser.first_name}
-                onChange={(e) =>
-                  setNewUser({ ...newUser, first_name: e.target.value })
-                }
-              />
-              <input
-                type="text"
-                className="form-control mt-2"
-                placeholder="Last Name"
-                value={newUser.last_name}
-                onChange={(e) =>
-                  setNewUser({ ...newUser, last_name: e.target.value })
-                }
-              />
-              <input
-                type="text"
-                className="form-control mt-2"
-                placeholder="Username"
-                value={newUser.username}
-                onChange={(e) =>
-                  setNewUser({ ...newUser, username: e.target.value })
-                }
-              />
-              <input
-                type="text"
-                className="form-control mt-2"
-                placeholder="Age"
-                value={newUser.age.toString()}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (
-                    value === "" ||
-                    (parseInt(value) > 0 &&
-                      parseInt(value) <= 120 &&
-                      !value.includes("e") &&
-                      /^[0-9]+$/.test(value))
-                  ) {
-                    setNewUser({ ...newUser, age: value ? +value : 1 });
+            <form>
+              <div className="card-body">
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="First Name"
+                  value={newUser.first_name}
+                  onChange={(e) =>
+                    setNewUser({ ...newUser, first_name: e.target.value })
                   }
-                }}
-              />
-              <input
-                type="text"
-                className="form-control mt-2"
-                placeholder="Marital Status"
-                value={newUser.marital_status}
-                onChange={(e) =>
-                  setNewUser({ ...newUser, marital_status: e.target.value })
-                }
-              />
-              <div className="d-flex justify-content-start align-self-start">
-                <div className="form-check mt-2">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    checked={newUser.is_employed}
-                    onChange={(e) =>
-                      setNewUser({ ...newUser, is_employed: e.target.checked })
+                  required
+                />
+                <input
+                  type="text"
+                  className="form-control mt-2"
+                  placeholder="Last Name"
+                  value={newUser.last_name}
+                  onChange={(e) =>
+                    setNewUser({ ...newUser, last_name: e.target.value })
+                  }
+                  required
+                />
+                <input
+                  type="text"
+                  className="form-control mt-2"
+                  placeholder="Username"
+                  value={newUser.username}
+                  onChange={(e) =>
+                    setNewUser({ ...newUser, username: e.target.value })
+                  }
+                  required
+                />
+                <input
+                  type="text"
+                  className="form-control mt-2"
+                  placeholder="Age"
+                  value={newUser.age.toString()}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (
+                      value === "" ||
+                      (parseInt(value) > 0 &&
+                        parseInt(value) <= 120 &&
+                        !value.includes("e") &&
+                        /^[0-9]+$/.test(value))
+                    ) {
+                      setNewUser({ ...newUser, age: value ? +value : 0 });
                     }
-                  />
-                  <label className="form-check-label">Employed</label>
+                  }}
+                  required
+                />
+                <input
+                  type="text"
+                  className="form-control mt-2"
+                  placeholder="Marital Status"
+                  value={newUser.marital_status}
+                  onChange={(e) =>
+                    setNewUser({ ...newUser, marital_status: e.target.value })
+                  }
+                  required
+                />
+                <div className="d-flex justify-content-start align-self-start">
+                  <div className="form-check mt-2">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      checked={newUser.is_employed}
+                      onChange={(e) =>
+                        setNewUser({
+                          ...newUser,
+                          is_employed: e.target.checked,
+                        })
+                      }
+                    />
+                    <label className="form-check-label">Employed</label>
+                  </div>
+                  <div className="form-check mt-2 mx-4">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      checked={newUser.is_founder}
+                      onChange={(e) =>
+                        setNewUser({ ...newUser, is_founder: e.target.checked })
+                      }
+                    />
+                    <label className="form-check-label">Founder</label>
+                  </div>
                 </div>
-                <div className="form-check mt-2 mx-4">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    checked={newUser.is_founder}
-                    onChange={(e) =>
-                      setNewUser({ ...newUser, is_founder: e.target.checked })
-                    }
-                  />
-                  <label className="form-check-label">Founder</label>
-                </div>
+                <button
+                  type="submit"
+                  className="btn btn-primary mt-2"
+                  title={editIndex !== null ? "Update user" : "Add user"}
+                  onClick={handleAddOrUpdateUser}
+                  disabled={isButtonDisabled}
+                >
+                  {editIndex !== null ? "Update User" : "Add User"}
+                </button>
               </div>
-              <button
-                className="btn btn-primary mt-2"
-                onClick={handleAddOrUpdateUser}
-              >
-                {editIndex !== null ? "Update User" : "Add User"}
-              </button>
-            </div>
+            </form>
           </div>
         </div>
 
@@ -218,15 +247,17 @@ function UserList() {
                       <td>
                         <button
                           className="btn btn-warning"
+                          title="Edit results"
                           onClick={() => handleEditUser(index)}
                         >
-                          Edit
+                          <FontAwesomeIcon icon={faEdit} />
                         </button>
                         <button
-                          className="btn btn-danger ml-2"
+                          className="btn btn-danger mx-2"
+                          title="Delete results"
                           onClick={() => handleDeleteUser(index)}
                         >
-                          Delete
+                          <FontAwesomeIcon icon={faTrash} />
                         </button>
                       </td>
                     </tr>
